@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace AtendeAi.API.Controllers
+namespace AtendeAi.API.Presentation.Controllers
 {
     [ApiController]
     [Route("[controller]")]
