@@ -7,51 +7,73 @@ namespace AtendeAi.API.Infrastructure.Repositories
 {
     public class TicketRepository(AppDbContext context) : ITicketRepository
     {
-        private readonly AppDbContext context = context;
+        private readonly AppDbContext _context = context;
 
         public async Task<List<Ticket>> GetAsync()
         {
-            return await context.Tickets.ToListAsync();
+            return await _context.Tickets.ToListAsync();
         }
 
         public async Task<Ticket> GetByIdAsync(int id)
         {
-            var response = await context.Tickets.FindAsync(id);
-            if (response is null)
-            {
-                throw new Exception("Not found");
-            }
-
-            return response;
+            var response = await _context.Tickets.SingleOrDefaultAsync(t => t.Id == id);
+            return response is null ? throw new Exception("Not found") : response;
         }
 
-        public async Task<List<Ticket>> GetFilterAsync(Ticket entity)
+        public async Task<List<Ticket>> GetFilterAsync(string? title, string? ticketNumber, DateTime? createAt, DateTime? updatedAt)
         {
-            return await context.Tickets.Where
+            return await _context.Tickets.Where
                 (t => 
-                      (t.TicketNumber == entity.TicketNumber || string.IsNullOrWhiteSpace(entity.TicketNumber)) ||
-                      (t.Title == entity.Title || string.IsNullOrWhiteSpace(entity.Title)) ||
-                      (t.CreatedAt == entity.CreatedAt || entity.CreatedAt == DateTime.MinValue) ||
-                      (t.CreatedAt == entity.CreatedAt || entity.CreatedAt == DateTime.MinValue)
+                      (t.TicketNumber == ticketNumber || string.IsNullOrWhiteSpace(ticketNumber)) 
+                      && (t.Title == title || string.IsNullOrWhiteSpace(title)) 
+                      && (t.CreatedAt == createAt || createAt == DateTime.MinValue || createAt == null) 
+                      && (t.UpdatedAt == updatedAt || updatedAt == DateTime.MinValue || updatedAt == null)
                 ).ToListAsync();
         }
 
         public async Task PostAsync(Ticket entity)
         {
-            await context.Tickets.AddAsync(entity);
-            await context.SaveChangesAsync();
+            await _context.Tickets.AddAsync(entity);
+            await _context.SaveChangesAsync();
         }
 
         public async Task PutAsync(Ticket entity)
         {
-            context.Tickets.Update(entity);
-            await context.SaveChangesAsync();
+            _context.Tickets.Update(entity);
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(Ticket entity)
         {
-            context.Tickets.Remove(entity);
-            await context.SaveChangesAsync();
+            _context.Tickets.Remove(entity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<string> CreateTicketNumber()
+        {
+            var dataHoje = DateTime.UtcNow.ToString("yyyyMMdd");
+            var prefixo = $"TCK-{dataHoje}-";
+
+            var ultimoChamado = await _context.Tickets
+                .Where(t => t.TicketNumber.StartsWith(prefixo))
+                .OrderByDescending(t => t.TicketNumber)
+                .FirstOrDefaultAsync();
+
+            int novoNumero = 1; // Se não houver chamado no dia, começa com 1
+
+            if (ultimoChamado != null)
+            {
+                var partes = ultimoChamado.TicketNumber.Split('-');
+                if (int.TryParse(partes.Last(), out int ultimoNumero))
+                {
+                    novoNumero = ultimoNumero + 1;
+                }
+            }
+
+            var novoNumeroChamado = $"TCK-{dataHoje}-{novoNumero:D3}";
+
+            return novoNumeroChamado;
+
         }
     }
 }

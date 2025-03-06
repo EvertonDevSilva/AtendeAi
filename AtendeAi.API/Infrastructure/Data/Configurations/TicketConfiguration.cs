@@ -1,7 +1,6 @@
 ﻿using AtendeAi.API.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Reflection.Emit;
 
 namespace AtendeAi.API.Infrastructure.Data.Configurations
 {
@@ -11,7 +10,7 @@ namespace AtendeAi.API.Infrastructure.Data.Configurations
         {
             builder.ToTable("Tickets");
             builder.Property(t => t.TicketNumber)
-                .HasMaxLength(8)
+                .HasMaxLength(16)
                 .IsRequired();
             builder.Property(t => t.Title)
                 .HasMaxLength(50)

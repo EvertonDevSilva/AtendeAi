@@ -64,16 +64,5 @@ namespace AtendeAi.API.Application.Mappings
                 Description = dto.Description
             };
         }
-
-        public static Ticket TicketFilterDtoToTicket(TicketFilterDTO dto)
-        {
-            return new Ticket
-            {
-                TicketNumber = dto.TicketNumber,
-                Title = dto.Title,
-                CreatedAt = dto.CreatedAt,
-                UpdatedAt = dto.UpdatedAt
-            };
-        }
     }
 }
