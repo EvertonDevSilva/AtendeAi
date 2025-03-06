@@ -2,6 +2,8 @@
 using AtendeAi.API.Application.Interfaces;
 using AtendeAi.API.Application.Mappings;
 using AtendeAi.API.Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 
 namespace AtendeAi.API.Application.Services
 {
@@ -25,26 +27,27 @@ namespace AtendeAi.API.Application.Services
             return dto;
         }
 
-        public async Task<List<TicketResponseDTO>> GetFilterAsync(TicketFilterDTO input)
+        public async Task<List<TicketResponseDTO>> GetFilterAsync(string? title, string? ticketNumber, DateTime? createAt, DateTime? updatedAt)
         {
-            var entity = TicketMapper.TicketFilterDtoToTicket(input);
-            var response =  await repository.GetFilterAsync(entity);
+            var response =  await repository.GetFilterAsync(title, ticketNumber, createAt, updatedAt);
             var dto = TicketMapper.ListTicketToListTicketDTO(response);
             return dto;
         }
 
-        public async Task PostAsync(TicketDTO input)
+        public async Task PostAsync(TicketDTO value)
         {
-            var entity = TicketMapper.TicketDtoToTicket(input);
+            var entity = TicketMapper.TicketDtoToTicket(value);
+            entity.TicketNumber = await CreateTicketNumber();
+            entity.CreatedAt = DateTime.Now;
             await repository.PostAsync(entity);
         }
 
-        public async Task PutAsync(int Id, TicketDTO input)
+        public async Task PutAsync(int Id, TicketDTO value)
         {
             var entity = await repository.GetByIdAsync(Id) ?? throw new Exception("Not found");
 
-            entity.Title = input.Title;
-            entity.Description = input.Description;
+            entity.Title = value.Title;
+            entity.Description = value.Description;
             entity.UpdatedAt = DateTime.UtcNow;
 
             await repository.PutAsync(entity);
@@ -54,6 +57,11 @@ namespace AtendeAi.API.Application.Services
         {
             var entity = await repository.GetByIdAsync(Id) ?? throw new Exception("Not found");
             await repository.DeleteAsync(entity);
+        }
+
+        private async Task<string> CreateTicketNumber()
+        {
+            return await repository.CreateTicketNumber();
         }
     }
 }

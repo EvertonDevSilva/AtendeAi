@@ -6,9 +6,10 @@ namespace AtendeAi.API.Infrastructure.Interfaces
     {
         Task<List<Ticket>> GetAsync();
         Task<Ticket> GetByIdAsync(int id);
-        Task<List<Ticket>> GetFilterAsync(Ticket entity);
+        Task<List<Ticket>> GetFilterAsync(string? title, string? ticketNumber, DateTime? createAt, DateTime? updatedAt);
         Task PostAsync(Ticket entity);
         Task PutAsync(Ticket entity);
         Task DeleteAsync(Ticket entity);
+        Task<string> CreateTicketNumber();
     }
 }

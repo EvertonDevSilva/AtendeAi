@@ -7,7 +7,7 @@ namespace AtendeAi.API.Application.Interfaces
     {
         Task<List<TicketResponseDTO>> GetAsync();
         Task<TicketResponseDTO> GetByIdAsync(int id);
-        Task<List<TicketResponseDTO>> GetFilterAsync(TicketFilterDTO dto);
+        Task<List<TicketResponseDTO>> GetFilterAsync(string? title, string? ticketNumber, DateTime? createAt, DateTime? updatedAt);
         Task PostAsync(TicketDTO dto);
         Task PutAsync(int Id, TicketDTO dto);
         Task DeleteAsync(int Id);

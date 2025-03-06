@@ -1,5 +1,12 @@
 
+using AtendeAi.API.Application.DTOs;
+using AtendeAi.API.Application.Interfaces;
+using AtendeAi.API.Application.Services;
+using AtendeAi.API.Application.Validators;
 using AtendeAi.API.Infrastructure.Data;
+using AtendeAi.API.Infrastructure.Interfaces;
+using AtendeAi.API.Infrastructure.Repositories;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace AtendeAi.API
@@ -16,10 +23,21 @@ namespace AtendeAi.API
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            
+            //builder.Services.AddDbContext<AppDbContext>(options =>
+            //    options.UseSqlite("Data Source=db_atende_ai_api.db"));
 
-            // Configura o DbContext para usar SQLite
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlite("Data Source=db_atende_ai_api.db"));
+                options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddScoped<ITicketService, TicketService>();
+            builder.Services.AddScoped<ITicketHistoryService, TicketHistoryService>();
+
+            builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+            builder.Services.AddScoped<ITicketHistoryRepository, TicketHistoryRepository>();
+            builder.Services.AddScoped<AppDbContext>();
+
+            builder.Services.AddTransient<IValidator<TicketDTO>, TicketValidator>();
 
 
             var app = builder.Build();
@@ -34,7 +52,6 @@ namespace AtendeAi.API
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 
